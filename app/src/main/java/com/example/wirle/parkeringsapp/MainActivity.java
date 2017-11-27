@@ -30,9 +30,15 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void goToAboutbackActivity(View view)
+    public void goToAboutActivity(View view)
     {
         Intent intent = new Intent(this, AboutActivity.class);
+        startActivity(intent);
+    }
+
+    public void goToBuyProActivity(View view)
+    {
+        Intent intent = new Intent(this, BuyProActivity.class);
         startActivity(intent);
     }
 }
