@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".DisplayMessageActivity" />
         <activity android:name=".FeedbackActivity" />
-        <activity android:name=".AboutActivity"></activity>
+        <activity android:name=".AboutActivity" />
+        <activity android:name=".BuyProActivity"></activity>
     </application>
 
 </manifest>
