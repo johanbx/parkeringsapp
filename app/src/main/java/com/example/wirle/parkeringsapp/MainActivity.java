@@ -82,10 +82,14 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-
+            ParkFragment parkFragment = new ParkFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(
+                    R.id.fragment_holder,
+                    parkFragment
+            ).commit();
         }
         else if (id == R.id.nav_about) {
-            // Handle the camera action
             AboutFragment aboutFragment = new AboutFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
