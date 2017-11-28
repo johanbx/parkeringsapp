@@ -11,3 +11,14 @@ Parkeringsapp är en app vars huvudsyfte är att få användaren att komma ihåg
 * [Firebase] - Firebase för analys och statistik
 
    [Firebase]: <https://firebase.google.com/>
+
+### För utveckling
+För att debugga firebase analytics i realtid, gå in i powershell och kör denna
+```sh
+PS C:\Users\wirle\AppData\Local\Android\Sdk\platform-tools> ./adb shell setprop debug.firebase.analytics.app com.example.wirle.parkeringsapp 
+```
+
+För att avsluta
+```sh
+PS C:\Users\wirle\AppData\Local\Android\Sdk\platform-tools> ./adb shell setprop debug.firebase.analytics.app .none.
+```
