@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.wirle.parkeringsapp.dummy.DummyContent;
@@ -81,6 +82,10 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == ResultCodes.OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                TextView navHeaderUserLoginName = findViewById(R.id.navHeaderUserLoginName);
+                navHeaderUserLoginName.setText(user.getDisplayName());
+                TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
+                navHeaderUserLoginMail.setText(user.getEmail());
                 // ...
             } else {
                 // Sign in failed, check response for error code
