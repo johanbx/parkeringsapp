@@ -13,11 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.wirle.parkeringsapp.dummy.DummyContent;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, PlaceFragment.OnListFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        PlaceFragment.OnListFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +117,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onListFragmentInteraction(DummyContent.DummyItem item) {
-        
+        Toast.makeText(this, item.details, Toast.LENGTH_SHORT).show();
     }
 }
