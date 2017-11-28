@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "478716516172",
+    "firebase_url": "https://parkerinsapp.firebaseio.com",
+    "project_id": "parkerinsapp",
+    "storage_bucket": "parkerinsapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478716516172:android:33f3baa10be72160",
+        "android_client_info": {
+          "package_name": "com.example.wirle.parkeringsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "478716516172-ef2lkhuvs234g7ggap2ifsjkv01uq6dl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wirle.parkeringsapp",
+            "certificate_hash": "97368bbd5d4706be246cb5d0d2694b972fb4c124"
+          }
+        },
+        {
+          "client_id": "478716516172-2si0o13vrvb5ufcvof7ahjc02o7tj4ab.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpw-4eht3iClqm4rCdtEOIA-Dyy0lBsz0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "478716516172-2si0o13vrvb5ufcvof7ahjc02o7tj4ab.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
