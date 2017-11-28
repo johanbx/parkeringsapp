@@ -15,6 +15,7 @@
     <string name="about_created_by">Skapad av Johan Borgenstierna</string>
 
     <string name="version">0.0.1</string>
+    <string name="google_maps_key">AIzaSyC6dn5ZgU-EkDfDkoKylEwXnD-EvZ2SHEI</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
