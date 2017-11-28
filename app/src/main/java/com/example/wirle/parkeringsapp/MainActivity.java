@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
+            analyseNavigationSelect(Integer.toString(id), "nav home");
             ParkFragment parkFragment = new ParkFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity
             ).commit();
         }
         else if (id == R.id.nav_about) {
+            analyseNavigationSelect(Integer.toString(id), "nav about");
             AboutFragment aboutFragment = new AboutFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
@@ -172,6 +174,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_buy) {
 
         } else if (id == R.id.nav_places) {
+            analyseNavigationSelect(Integer.toString(id), "nav places");
             PlaceFragment placeFragment = new PlaceFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
@@ -183,6 +186,15 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void analyseNavigationSelect(String id, String type)
+    {
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, type);
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "NavigationItem");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     public void onListFragmentInteraction(DummyContent.DummyItem item) {
