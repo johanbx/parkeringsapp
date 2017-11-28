@@ -1,10 +1,13 @@
 package com.example.wirle.parkeringsapp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +76,21 @@ public class MainActivity extends AppCompatActivity
             RC_SIGN_IN);
     }
 
+    protected void setupNavHeaderUser(FirebaseUser user)
+    {
+        // image
+        ImageView navHeaderUserLoginImage = findViewById(R.id.navHeaderUserLoginImage);
+        new ImageLoadTask(user.getPhotoUrl().toString(), navHeaderUserLoginImage).execute();
+
+        // name
+        TextView navHeaderUserLoginName = findViewById(R.id.navHeaderUserLoginName);
+        navHeaderUserLoginName.setText(user.getDisplayName());
+
+        // mail
+        TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
+        navHeaderUserLoginMail.setText(user.getEmail());
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -82,10 +101,7 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == ResultCodes.OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                TextView navHeaderUserLoginName = findViewById(R.id.navHeaderUserLoginName);
-                navHeaderUserLoginName.setText(user.getDisplayName());
-                TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
-                navHeaderUserLoginMail.setText(user.getEmail());
+                setupNavHeaderUser(user);
                 // ...
             } else {
                 // Sign in failed, check response for error code
