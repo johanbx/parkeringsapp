@@ -14,8 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.wirle.parkeringsapp.dummy.DummyContent;
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, PlaceFragment.OnListFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +101,20 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_buy) {
 
         } else if (id == R.id.nav_places) {
-
+            PlaceFragment placeFragment = new PlaceFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(
+                    R.id.fragment_holder,
+                    placeFragment
+            ).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+        
     }
 }
