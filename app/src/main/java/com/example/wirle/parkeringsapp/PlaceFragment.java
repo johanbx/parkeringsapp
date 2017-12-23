@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 
 import com.example.wirle.parkeringsapp.dummy.DummyContent;
 import com.example.wirle.parkeringsapp.dummy.DummyContent.DummyItem;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -35,7 +37,6 @@ public class PlaceFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override

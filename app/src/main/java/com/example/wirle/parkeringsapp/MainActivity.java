@@ -32,6 +32,8 @@ import com.firebase.ui.auth.ResultCodes;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_SIGN_IN = 123;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+    private DatabaseReference mDatabaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,12 +116,25 @@ public class MainActivity extends AppCompatActivity
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 setupNavHeaderUser(user);
+                initializeDatabaseConnection(user);
                 // ...
             } else {
                 // Sign in failed, check response for error code
                 // ...
             }
         }
+    }
+
+    private void initializeDatabaseConnection(FirebaseUser user) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        mDatabaseRef = database.getReference(user.getUid());
+        testWriteMsgToDb();
+    }
+
+    private void testWriteMsgToDb()
+    {
+        DatabaseReference newPos = mDatabaseRef.child("positions").push();
+        newPos.setValue("some new position");
     }
 
     @Override
