@@ -35,13 +35,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        PlaceFragment.OnListFragmentInteractionListener {
+        PlaceFragment.OnListFragmentInteractionListener{
 
+    private static final String DBREFKEY = "DBREFKEY";
     private static final int RC_SIGN_IN = 123;
 
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -128,13 +130,6 @@ public class MainActivity extends AppCompatActivity
     private void initializeDatabaseConnection(FirebaseUser user) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         mDatabaseRef = database.getReference(user.getUid());
-        testWriteMsgToDb();
-    }
-
-    private void testWriteMsgToDb()
-    {
-        DatabaseReference newPos = mDatabaseRef.child("positions").push();
-        newPos.setValue("some new position");
     }
 
     @Override
@@ -196,7 +191,15 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_places) {
             analyseNavigationSelect(Integer.toString(id), "nav places");
+
+            // send database reference
+            Bundle bundle = new Bundle();
+            SerializableDatabaseReference send = new SerializableDatabaseReference(mDatabaseRef);
+            bundle.putSerializable(DBREFKEY, send);
+
             PlaceFragment placeFragment = new PlaceFragment();
+            placeFragment.setArguments(bundle);
+
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
                     R.id.fragment_holder,

@@ -25,7 +25,10 @@ import java.util.List;
  */
 public class PlaceFragment extends Fragment {
 
+    private static final String DBREFKEY = "DBREFKEY";
+
     private OnListFragmentInteractionListener mListener;
+    private DatabaseReference mDatabaseRef;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -37,6 +40,12 @@ public class PlaceFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    private void testWriteMsgToDb()
+    {
+        DatabaseReference newPos = mDatabaseRef.child("positions").push();
+        newPos.setValue("position from placefragment");
     }
 
     @Override
@@ -51,6 +60,14 @@ public class PlaceFragment extends Fragment {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(new PlaceRecyclerViewAdapter(DummyContent.ITEMS, mListener));
         }
+
+        SerializableDatabaseReference send = (SerializableDatabaseReference) getArguments()
+                .getSerializable(DBREFKEY);
+        if (send != null) {
+            mDatabaseRef = send.ref;
+            testWriteMsgToDb();
+        }
+
         return view;
     }
 
