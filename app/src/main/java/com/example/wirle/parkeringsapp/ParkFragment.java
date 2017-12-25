@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -31,7 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ParkFragment extends Fragment implements OnMapReadyCallback {
+public class ParkFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
 
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -71,17 +72,19 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        testWriteMsgToDb();
+        // attach click listener on togglebutton
+        ToggleButton toggleButton = (ToggleButton) v.findViewById(R.id.toggleButton);
+        toggleButton.setOnClickListener(this);
 
         return v;
     }
 
-    private void testWriteMsgToDb()
+    public void savePositionToDb()
     {
         DatabaseReference newPos = mRefListener.OnDatabaseRef().child("positions").push();
         PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
         positionItem.id = newPos.getKey();
-        positionItem.coordinates = "new thing!";
+        positionItem.coordinates = mLastKnownLocation.toString();
         newPos.setValue(positionItem);
     }
 
@@ -197,6 +200,16 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
         else {
             throw new RuntimeException(context.toString()
                     + " must implement OnDatabaseRefListener");
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        //do what you want to do when button is clicked
+        switch (view.getId()) {
+            case R.id.toggleButton:
+                savePositionToDb();
+                break;
         }
     }
 
