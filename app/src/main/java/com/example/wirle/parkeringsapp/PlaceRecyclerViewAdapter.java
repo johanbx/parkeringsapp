@@ -7,21 +7,19 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.wirle.parkeringsapp.PlaceFragment.OnListFragmentInteractionListener;
-import com.example.wirle.parkeringsapp.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link PositionItem} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<PositionContent.PositionItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public PlaceRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public PlaceRecyclerViewAdapter(List<PositionContent.PositionItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -37,7 +35,7 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mContentView.setText(mValues.get(position).coordinates);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +58,7 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public PositionContent.PositionItem mItem;
 
         public ViewHolder(View view) {
             super(view);

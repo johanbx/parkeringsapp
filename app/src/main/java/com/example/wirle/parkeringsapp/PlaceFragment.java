@@ -6,16 +6,24 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.wirle.parkeringsapp.dummy.DummyContent;
 import com.example.wirle.parkeringsapp.dummy.DummyContent.DummyItem;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A fragment representing a list of Items.
@@ -29,6 +37,8 @@ public class PlaceFragment extends Fragment {
 
     private OnListFragmentInteractionListener mListener;
     private DatabaseReference mDatabaseRef;
+    private ArrayList<String> listItems;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -40,32 +50,58 @@ public class PlaceFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // open bundle
+        SerializableDatabaseReference serializableDatabaseReference =
+                (SerializableDatabaseReference) getArguments()
+                .getSerializable(DBREFKEY);
+
+        // init
+        initDatabaseReference(serializableDatabaseReference);
+        initPositionContent();
+        testWriteMsgToDb();
+    }
+
+    private void initDatabaseReference(SerializableDatabaseReference
+                                               serializableDatabaseReference) {
+        mDatabaseRef = serializableDatabaseReference.ref;
+    }
+
+    private void initPositionContent() {
+        DatabaseReference mDbPositions = mDatabaseRef.child("positions");
+        mDbPositions.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                PositionContent.initPositionContent(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getActivity(), "Failed to fetch data",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void testWriteMsgToDb()
     {
         DatabaseReference newPos = mDatabaseRef.child("positions").push();
-        newPos.setValue("position from placefragment");
+        PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
+        positionItem.id = newPos.getKey();
+        positionItem.coordinates = "some coords";
+        newPos.setValue(positionItem);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_place_list, container, false);
-
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new PlaceRecyclerViewAdapter(DummyContent.ITEMS, mListener));
-        }
-
-        SerializableDatabaseReference send = (SerializableDatabaseReference) getArguments()
-                .getSerializable(DBREFKEY);
-        if (send != null) {
-            mDatabaseRef = send.ref;
-            testWriteMsgToDb();
+            recyclerView.setAdapter(new PlaceRecyclerViewAdapter(PositionContent.ITEMS, mListener));
         }
 
         return view;
@@ -100,7 +136,6 @@ public class PlaceFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(PositionContent.PositionItem item);
     }
 }

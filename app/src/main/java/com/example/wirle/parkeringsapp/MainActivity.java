@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
-        Toast.makeText(this, item.details, Toast.LENGTH_SHORT).show();
+    public void onListFragmentInteraction(PositionContent.PositionItem item) {
+        Toast.makeText(this, item.coordinates, Toast.LENGTH_SHORT).show();
     }
 }
