@@ -41,7 +41,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        PlaceFragment.OnListFragmentInteractionListener{
+        PlaceFragment.OnListFragmentInteractionListener,
+        PlaceFragment.OnDatabaseRefListener,
+        ParkFragment.OnDatabaseRefListener{
 
     private static final String DBREFKEY = "DBREFKEY";
     private static final int RC_SIGN_IN = 123;
@@ -191,15 +193,7 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_places) {
             analyseNavigationSelect(Integer.toString(id), "nav places");
-
-            // send database reference
-            Bundle bundle = new Bundle();
-            SerializableDatabaseReference send = new SerializableDatabaseReference(mDatabaseRef);
-            bundle.putSerializable(DBREFKEY, send);
-
             PlaceFragment placeFragment = new PlaceFragment();
-            placeFragment.setArguments(bundle);
-
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
                     R.id.fragment_holder,
@@ -221,7 +215,13 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
+    @Override
     public void onListFragmentInteraction(PositionContent.PositionItem item) {
         Toast.makeText(this, item.coordinates, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public DatabaseReference OnDatabaseRef() {
+        return mDatabaseRef;
     }
 }

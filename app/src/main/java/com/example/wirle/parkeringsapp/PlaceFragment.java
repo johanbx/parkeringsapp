@@ -36,8 +36,11 @@ public class PlaceFragment extends Fragment {
     private static final String DBREFKEY = "DBREFKEY";
 
     private OnListFragmentInteractionListener mListener;
-    private DatabaseReference mDatabaseRef;
+    private OnDatabaseRefListener mRefListener;
+
+    //private DatabaseReference mDatabaseRef;
     private ArrayList<String> listItems;
+    private RecyclerView recyclerView;
 
 
     /**
@@ -50,29 +53,16 @@ public class PlaceFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // open bundle
-        SerializableDatabaseReference serializableDatabaseReference =
-                (SerializableDatabaseReference) getArguments()
-                .getSerializable(DBREFKEY);
-
-        // init
-        initDatabaseReference(serializableDatabaseReference);
         initPositionContent();
-        testWriteMsgToDb();
-    }
-
-    private void initDatabaseReference(SerializableDatabaseReference
-                                               serializableDatabaseReference) {
-        mDatabaseRef = serializableDatabaseReference.ref;
     }
 
     private void initPositionContent() {
-        DatabaseReference mDbPositions = mDatabaseRef.child("positions");
+        DatabaseReference mDbPositions = mRefListener.OnDatabaseRef().child("positions");
         mDbPositions.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 PositionContent.initPositionContent(dataSnapshot);
+                recyclerView.getAdapter().notifyDataSetChanged();
             }
 
             @Override
@@ -83,23 +73,15 @@ public class PlaceFragment extends Fragment {
         });
     }
 
-    private void testWriteMsgToDb()
-    {
-        DatabaseReference newPos = mDatabaseRef.child("positions").push();
-        PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
-        positionItem.id = newPos.getKey();
-        positionItem.coordinates = "some coords";
-        newPos.setValue(positionItem);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_place_list, container, false);
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(new PlaceRecyclerViewAdapter(PositionContent.ITEMS, mListener));
         }
@@ -113,9 +95,19 @@ public class PlaceFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnListFragmentInteractionListener) {
             mListener = (OnListFragmentInteractionListener) context;
-        } else {
+        }
+        else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
+        }
+
+
+        if (context instanceof OnDatabaseRefListener) {
+            mRefListener = (OnDatabaseRefListener) context;
+        }
+        else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnDatabaseRefListener");
         }
     }
 
@@ -137,5 +129,9 @@ public class PlaceFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(PositionContent.PositionItem item);
+    }
+
+    public interface OnDatabaseRefListener {
+        DatabaseReference OnDatabaseRef();
     }
 }

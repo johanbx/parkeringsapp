@@ -11,7 +11,8 @@ import com.example.wirle.parkeringsapp.PlaceFragment.OnListFragmentInteractionLi
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link PositionItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a
+ * {@link com.example.wirle.parkeringsapp.PositionContent.PositionItem} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecyclerViewAdapter.ViewHolder> {
@@ -34,7 +35,7 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
+        //holder.mIdView.setText(mValues.get(position).id);
         holder.mContentView.setText(mValues.get(position).coordinates);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -56,14 +57,14 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
+        //public final TextView mIdView;
         public final TextView mContentView;
         public PositionContent.PositionItem mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
+            //mIdView = (TextView) view.findViewById(R.id.id);
             mContentView = (TextView) view.findViewById(R.id.content);
         }
 

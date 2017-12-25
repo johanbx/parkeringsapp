@@ -17,10 +17,18 @@ public class PositionContent {
     public static final Map<String, PositionItem> ITEM_MAP = new HashMap<>();
 
     public static void initPositionContent(DataSnapshot snapshot){
+        clearItems();
+
         for (DataSnapshot positionSnapshot: snapshot.getChildren()) {
             PositionItem positionItem = positionSnapshot.getValue(PositionItem.class);
             addItem(positionItem);
         }
+    }
+
+    private static void clearItems()
+    {
+        ITEM_MAP.clear();
+        ITEMS.clear();
     }
 
     private static void addItem(PositionItem item) {

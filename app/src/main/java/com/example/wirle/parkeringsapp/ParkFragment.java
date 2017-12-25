@@ -1,6 +1,7 @@
 package com.example.wirle.parkeringsapp;
 
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 
 
 /**
@@ -34,9 +36,11 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 15;
+    private static final String DBREFKEY = "DBREFKEY";
 
     private boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
+    private OnDatabaseRefListener mRefListener;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -47,6 +51,11 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
 
     public ParkFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -62,7 +71,18 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        testWriteMsgToDb();
+
         return v;
+    }
+
+    private void testWriteMsgToDb()
+    {
+        DatabaseReference newPos = mRefListener.OnDatabaseRef().child("positions").push();
+        PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
+        positionItem.id = newPos.getKey();
+        positionItem.coordinates = "new thing!";
+        newPos.setValue(positionItem);
     }
 
     @Override
@@ -165,5 +185,23 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback {
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof ParkFragment.OnDatabaseRefListener) {
+            mRefListener = (OnDatabaseRefListener) context;
+        }
+        else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnDatabaseRefListener");
+        }
+    }
+
+    // interfaces
+    public interface OnDatabaseRefListener {
+        DatabaseReference OnDatabaseRef();
     }
 }
