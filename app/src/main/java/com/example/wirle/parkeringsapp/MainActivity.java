@@ -51,6 +51,13 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mDatabaseRef;
 
+    /*
+    * Note to self:
+    * This function is called on rotation and therefor it will always login and
+    * change to "home" on rotation. This is bad practise but will have to suffice for
+    * now. For now, users can only use portraitmode (see manifest).
+    *
+    * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
