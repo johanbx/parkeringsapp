@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Inställningar</string>
+    <string name="app_name">ParkeringsApp</string>
+    <string name="navigation_item_home">Hem</string>
+    <string name="navigation_item_place">Parkeringshistorik</string>
+    <string name="navigation_item_buy">Köp Pro</string>
+    <string name="navigation_item_about">Om oss</string>
+    <string name="about_headline">ParkeringsApp</string>
+    <string name="about_created_by">Skapad av Johan Borgenstierna</string>
+    <string name="frag_park_parkbutton_on">Parkerad</string>
+    <string name="frag_park_parkbutton_off">Parkera</string>
+    <string name="frag_park_autopark_label">Auto Parkera</string>
+</resources>
