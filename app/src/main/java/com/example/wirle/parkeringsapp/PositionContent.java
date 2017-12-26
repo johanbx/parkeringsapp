@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.location.Address;
+import android.location.Location;
+
 /**
  * Created by johan on 2017-12-25.
  */
@@ -38,18 +41,15 @@ public class PositionContent {
 
     public static class PositionItem {
         public String id;
-        public String coordinates;
-
-        /*
-        public PositionItem(String id, String coordinates) {
-            this.id = id;
-            this.coordinates = coordinates;
-        }
-        */
+        public Double longitude;
+        public Double latitude;
+        public Long time;
+        public Float accuracy;
+        public String address;
 
         @Override
         public String toString() {
-            return coordinates;
+            return address;
         }
     }
 }

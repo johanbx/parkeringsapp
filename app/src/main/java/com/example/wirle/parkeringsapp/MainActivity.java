@@ -120,10 +120,9 @@ public class MainActivity extends AppCompatActivity
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 setupNavHeaderUser(user);
                 initializeDatabaseConnection(user);
-                // ...
             } else {
                 // Sign in failed, check response for error code
-                // ...
+                Toast.makeText(this, "Failed to login", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -216,7 +215,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(PositionContent.PositionItem item) {
-        Toast.makeText(this, item.coordinates, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, item.id, Toast.LENGTH_SHORT).show();
     }
 
     @Override

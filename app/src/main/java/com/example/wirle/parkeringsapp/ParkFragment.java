@@ -3,6 +3,8 @@ package com.example.wirle.parkeringsapp;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -27,6 +30,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -79,12 +86,21 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         return v;
     }
 
-    public void savePositionToDb()
-    {
+    public void savePositionToDb() throws IOException {
         DatabaseReference newPos = mRefListener.OnDatabaseRef().child("positions").push();
         PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
         positionItem.id = newPos.getKey();
-        positionItem.coordinates = mLastKnownLocation.toString();
+        positionItem.latitude = mLastKnownLocation.getLatitude();
+        positionItem.longitude = mLastKnownLocation.getLongitude();
+        positionItem.time = mLastKnownLocation.getTime();
+        positionItem.accuracy = mLastKnownLocation.getAccuracy();
+
+        // fetch address from long and lat
+        Geocoder geocoder  = new Geocoder(getActivity(), Locale.getDefault());
+        List<Address> result = geocoder.getFromLocation(
+                positionItem.latitude, positionItem.longitude, 1);
+        positionItem.address = result.get(0).getAddressLine(0);
+
         newPos.setValue(positionItem);
     }
 
@@ -210,7 +226,13 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
             case R.id.toggleButton:
                 ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
                 if (toggleButton.isChecked()) {
-                    savePositionToDb();
+                    try {
+                        savePositionToDb();
+                    } catch (IOException e) {
+                        Toast.makeText(getActivity(),"Failed to save location",
+                                Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
                 }
                 break;
         }
