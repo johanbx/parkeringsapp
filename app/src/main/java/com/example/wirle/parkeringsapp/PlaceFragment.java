@@ -12,8 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.wirle.parkeringsapp.dummy.DummyContent;
-import com.example.wirle.parkeringsapp.dummy.DummyContent.DummyItem;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
