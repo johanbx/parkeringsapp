@@ -208,7 +208,10 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         //do what you want to do when button is clicked
         switch (view.getId()) {
             case R.id.toggleButton:
-                savePositionToDb();
+                ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
+                if (toggleButton.isChecked()) {
+                    savePositionToDb();
+                }
                 break;
         }
     }
