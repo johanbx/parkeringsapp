@@ -1,5 +1,6 @@
 package com.example.wirle.parkeringsapp;
 
+import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.firebase.database.DataSnapshot;
 
 import java.sql.Timestamp;
@@ -24,14 +25,10 @@ public class PositionContent {
 
     public static void initPositionContent(DataSnapshot snapshot){
         clearItems();
-        /*
-        Iterator e = snapshot.getChildren().iterator();
-        while(e.)
-           */
 
         for (DataSnapshot positionSnapshot: snapshot.getChildren()) {
             PositionItem positionItem = positionSnapshot.getValue(PositionItem.class);
-            addItem(positionItem);
+            insertItem(positionItem);
         }
     }
 
@@ -43,6 +40,11 @@ public class PositionContent {
 
     private static void addItem(PositionItem item) {
         ITEMS.add(item);
+        ITEM_MAP.put(item.id, item);
+    }
+
+    private static void insertItem(PositionItem item) {
+        ITEMS.add(0, item);
         ITEM_MAP.put(item.id, item);
     }
 
