@@ -247,6 +247,10 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
                         e.printStackTrace();
                     }
                 }
+                else {
+                    // remove marking on map
+                    mMap.clear();
+                }
                 break;
         }
     }
