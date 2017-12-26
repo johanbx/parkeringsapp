@@ -8,7 +8,7 @@ Parkeringsapp är en app vars huvudsyfte är att få användaren att komma ihåg
    - Spara parkeringsplatser och parkeringstider
 
 ### Några tekniker använda i appen
-* [Firebase] - Firebase för analys och statistik
+* [Firebase] - Firebase för analys, statistik, användarinloggningar och databashantering
 
    [Firebase]: <https://firebase.google.com/>
 
