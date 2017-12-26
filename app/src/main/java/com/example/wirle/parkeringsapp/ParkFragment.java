@@ -89,19 +89,32 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     public void savePositionToDb() throws IOException {
         DatabaseReference newPos = mRefListener.OnDatabaseRef().child("positions").push();
         PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
+
         positionItem.id = newPos.getKey();
         positionItem.latitude = mLastKnownLocation.getLatitude();
         positionItem.longitude = mLastKnownLocation.getLongitude();
         positionItem.time = mLastKnownLocation.getTime();
         positionItem.accuracy = mLastKnownLocation.getAccuracy();
+        positionItem.address = getAddressFromLocation(positionItem.latitude,
+                positionItem.longitude);
 
+        newPos.setValue(positionItem);
+        addMarker(positionItem.latitude, positionItem.longitude, positionItem.address);
+    }
+
+    private void addMarker(Double latitude, Double longitude, String title) {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(
+                new LatLng(latitude, longitude)).title(title));
+    }
+
+    private String getAddressFromLocation(Double latitude, Double longitude) throws IOException {
         // fetch address from long and lat
         Geocoder geocoder  = new Geocoder(getActivity(), Locale.getDefault());
         List<Address> result = geocoder.getFromLocation(
-                positionItem.latitude, positionItem.longitude, 1);
-        positionItem.address = result.get(0).getAddressLine(0);
+                latitude, longitude, 1);
 
-        newPos.setValue(positionItem);
+        return result.get(0).getAddressLine(0);
     }
 
     @Override

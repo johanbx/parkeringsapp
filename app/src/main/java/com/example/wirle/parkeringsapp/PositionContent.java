@@ -2,9 +2,12 @@ package com.example.wirle.parkeringsapp;
 
 import com.google.firebase.database.DataSnapshot;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import android.location.Address;
@@ -21,6 +24,10 @@ public class PositionContent {
 
     public static void initPositionContent(DataSnapshot snapshot){
         clearItems();
+        /*
+        Iterator e = snapshot.getChildren().iterator();
+        while(e.)
+           */
 
         for (DataSnapshot positionSnapshot: snapshot.getChildren()) {
             PositionItem positionItem = positionSnapshot.getValue(PositionItem.class);
@@ -49,7 +56,7 @@ public class PositionContent {
 
         @Override
         public String toString() {
-            return address;
+            return (new Timestamp(time)).toString() + " " + address;
         }
     }
 }
