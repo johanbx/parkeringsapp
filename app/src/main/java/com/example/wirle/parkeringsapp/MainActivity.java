@@ -1,22 +1,11 @@
 package com.example.wirle.parkeringsapp;
 
-import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -38,7 +27,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,16 +62,16 @@ public class MainActivity extends AppCompatActivity
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         // set default page
@@ -108,11 +96,15 @@ public class MainActivity extends AppCompatActivity
     {
         // image
         ImageView navHeaderUserLoginImage = findViewById(R.id.navHeaderUserLoginImage);
-        new ImageLoadTask(user.getPhotoUrl().toString(), navHeaderUserLoginImage).execute();
+        if (user.getPhotoUrl() != null) {
+            new ImageLoadTask(user.getPhotoUrl().toString(), navHeaderUserLoginImage).execute();
+        }
 
         // name
         TextView navHeaderUserLoginName = findViewById(R.id.navHeaderUserLoginName);
-        navHeaderUserLoginName.setText(user.getDisplayName());
+        if (navHeaderUserLoginImage != null) {
+            navHeaderUserLoginName.setText(user.getDisplayName());
+        }
 
         // mail
         TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
@@ -126,15 +118,13 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
-            if (resultCode == ResultCodes.OK) {
+            if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 setupNavHeaderUser(user);
                 initializeDatabaseConnection(user);
             } else {
                 signInFailed();
-                // Sign in failed, check response for error code
-                Toast.makeText(this, "Failed to login", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -174,7 +164,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -206,7 +196,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -238,7 +228,7 @@ public class MainActivity extends AppCompatActivity
             ).addToBackStack(null).commit();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

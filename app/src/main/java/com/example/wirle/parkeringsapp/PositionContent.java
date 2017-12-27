@@ -1,23 +1,13 @@
 package com.example.wirle.parkeringsapp;
 
-import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.firebase.database.DataSnapshot;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-
-import android.location.Address;
-import android.location.Location;
-
-/**
- * Created by johan on 2017-12-25.
- */
 
 public class PositionContent {
 

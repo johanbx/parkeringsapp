@@ -8,7 +8,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -21,15 +20,11 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -91,7 +86,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         mapFragment.getMapAsync(this);
 
         // attach click listener on togglebutton
-        ToggleButton toggleButton = (ToggleButton) v.findViewById(R.id.toggleButton);
+        ToggleButton toggleButton = v.findViewById(R.id.toggleButton);
         toggleButton.setOnClickListener(this);
 
         return v;
@@ -162,7 +157,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         if (bundle != null) {
             if (bundle.containsKey(POSITIONITEMKEY)) {
                 // hide parking button
-                ToggleButton toggleButton = (ToggleButton) getView()
+                ToggleButton toggleButton = getView()
                         .findViewById(R.id.toggleButton);
                 toggleButton.setVisibility(View.INVISIBLE);
 
@@ -171,19 +166,21 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
                         (PositionContent.PositionItem) bundle
                                 .getSerializable(POSITIONITEMKEY);
 
-                MarkerObject markerObject = new MarkerObject();
-                markerObject.longitude = positionItem.longitude;
-                markerObject.latitude = positionItem.latitude;
-                markerObject.address = positionItem.address;
+                if (positionItem != null) {
+                    MarkerObject markerObject = new MarkerObject();
+                    markerObject.longitude = positionItem.longitude;
+                    markerObject.latitude = positionItem.latitude;
+                    markerObject.address = positionItem.address;
 
-                currentMarker = markerObject;
+                    currentMarker = markerObject;
 
-                addMarker(currentMarker);
+                    addMarker(currentMarker);
 
-                // move camera to marker
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(positionItem.latitude,
-                                positionItem.longitude), DEFAULT_ZOOM));
+                    // move camera to marker
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(positionItem.latitude,
+                                    positionItem.longitude), DEFAULT_ZOOM));
+                }
             }
         }
         else {
@@ -291,7 +288,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         //do what you want to do when button is clicked
         switch (view.getId()) {
             case R.id.toggleButton:
-                ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
+                ToggleButton toggleButton = view.findViewById(R.id.toggleButton);
                 if (toggleButton.isChecked()) {
                     try {
                         savePositionToDb();

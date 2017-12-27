@@ -20,8 +20,8 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
     private final List<PositionContent.PositionItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public PlaceRecyclerViewAdapter(List<PositionContent.PositionItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public PlaceRecyclerViewAdapter(OnListFragmentInteractionListener listener) {
+        mValues = PositionContent.ITEMS;
         mListener = listener;
     }
 
@@ -65,7 +65,7 @@ public class PlaceRecyclerViewAdapter extends RecyclerView.Adapter<PlaceRecycler
             super(view);
             mView = view;
             //mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mContentView = view.findViewById(R.id.content);
         }
 
         @Override

@@ -2,8 +2,8 @@
     <string name="app_name">ParkingApp</string>
     <string name="version" translatable="false">0.0.1</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
 
@@ -18,4 +18,7 @@
     <string name="frag_park_autopark_label">Auto Park</string>
     <string name="frag_park_parkbutton_off">Park</string>
     <string name="frag_park_parkbutton_on">Parked</string>
+
+    <string name="default_nav_name" translatable="false">Android Studio</string>
+    <string name="default_nav_mail" translatable="false">android.studio@android.com</string>
 </resources>
