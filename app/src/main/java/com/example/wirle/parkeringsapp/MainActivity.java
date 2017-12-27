@@ -1,10 +1,12 @@
 package com.example.wirle.parkeringsapp;
 
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -129,10 +132,39 @@ public class MainActivity extends AppCompatActivity
                 setupNavHeaderUser(user);
                 initializeDatabaseConnection(user);
             } else {
+                signInFailed();
                 // Sign in failed, check response for error code
                 Toast.makeText(this, "Failed to login", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+
+    private void signInFailed()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Could not login user");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(
+                "Exit app",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        exitApplication();
+                    }
+                });
+
+        AlertDialog alert11 = builder.create();
+        alert11.show();
+    }
+
+    private void exitApplication()
+    {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void initializeDatabaseConnection(FirebaseUser user) {
