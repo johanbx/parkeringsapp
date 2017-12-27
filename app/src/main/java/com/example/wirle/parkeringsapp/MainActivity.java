@@ -51,17 +51,22 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mDatabaseRef;
 
+    ParkFragment parkFragment;
+
     /*
-    * Note to self:
-    * This function is called on rotation and therefor it will always login and
-    * change to "home" on rotation. This is bad practise but will have to suffice for
-    * now. For now, users can only use portraitmode (see manifest).
-    *
-    * */
+        * Note to self:
+        * This function is called on rotation and therefor it will always login and
+        * change to "home" on rotation. This is bad practise but will have to suffice for
+        * now. For now, users can only use portraitmode (see manifest).
+        *
+        * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // init fragments that require a "state"
+        parkFragment = new ParkFragment();
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -175,7 +180,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             analyseNavigationSelect(Integer.toString(id), "nav home");
-            ParkFragment parkFragment = new ParkFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
                     R.id.fragment_holder,

@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -26,12 +27,14 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,11 +47,15 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 15;
-    private static final String DBREFKEY = "DBREFKEY";
+
+    private static final String CURRENTMARKERKEY = "CURRENTMARKERKEY";
+    private static final String DEBUGTAG = "ParkFragment";
 
     private boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
     private OnDatabaseRefListener mRefListener;
+
+    private MarkerObject currentMarker;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -56,6 +63,12 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
+
+    private class MarkerObject implements Serializable{
+        private Double latitude;
+        private Double longitude;
+        private String address;
+    }
 
     public ParkFragment() {
         // Required empty public constructor
@@ -99,13 +112,20 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
                 positionItem.longitude);
 
         newPos.setValue(positionItem);
-        addMarker(positionItem.latitude, positionItem.longitude, positionItem.address);
+
+        currentMarker = new MarkerObject();
+        currentMarker.latitude = positionItem.latitude;
+        currentMarker.longitude = positionItem.longitude;
+        currentMarker.address = positionItem.address;
+
+        addMarker(currentMarker);
     }
 
-    private void addMarker(Double latitude, Double longitude, String title) {
+    private void addMarker(MarkerObject markerObject) {
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(
-                new LatLng(latitude, longitude)).title(title));
+                new LatLng(markerObject.latitude, markerObject.longitude))
+                .title(markerObject.address));
     }
 
     private String getAddressFromLocation(Double latitude, Double longitude) throws IOException {
