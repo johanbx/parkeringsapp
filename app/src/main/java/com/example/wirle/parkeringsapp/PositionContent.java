@@ -3,6 +3,7 @@ package com.example.wirle.parkeringsapp;
 import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.firebase.database.DataSnapshot;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class PositionContent {
         ITEM_MAP.put(item.id, item);
     }
 
-    public static class PositionItem {
+    public static class PositionItem implements Serializable {
         public String id;
         public Double longitude;
         public Double latitude;

@@ -21,11 +21,13 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,6 +50,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 15;
 
+    private static final String POSITIONITEMKEY = "POSITIONITEMKEY";
     private static final String CURRENTMARKERKEY = "CURRENTMARKERKEY";
     private static final String DEBUGTAG = "ParkFragment";
 
@@ -72,11 +75,6 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
 
     public ParkFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -154,8 +152,44 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
+        // check bundle
+        checkBundle();
+    }
+
+    private void checkBundle() {
+        // if sent with bundle
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            if (bundle.containsKey(POSITIONITEMKEY)) {
+                // hide parking button
+                ToggleButton toggleButton = (ToggleButton) getView()
+                        .findViewById(R.id.toggleButton);
+                toggleButton.setVisibility(View.INVISIBLE);
+
+                // show marker on that item
+                PositionContent.PositionItem positionItem =
+                        (PositionContent.PositionItem) bundle
+                                .getSerializable(POSITIONITEMKEY);
+
+                MarkerObject markerObject = new MarkerObject();
+                markerObject.longitude = positionItem.longitude;
+                markerObject.latitude = positionItem.latitude;
+                markerObject.address = positionItem.address;
+
+                currentMarker = markerObject;
+
+                addMarker(currentMarker);
+
+                // move camera to marker
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(positionItem.latitude,
+                                positionItem.longitude), DEFAULT_ZOOM));
+            }
+        }
+        else {
+            // Get the current location of the device and set the position of the map.
+            getDeviceLocation();
+        }
     }
 
     /**

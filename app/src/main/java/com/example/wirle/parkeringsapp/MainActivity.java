@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         PlaceFragment.OnDatabaseRefListener,
         ParkFragment.OnDatabaseRefListener{
 
-    private static final String DBREFKEY = "DBREFKEY";
+    private static final String POSITIONITEMKEY = "POSITIONITEMKEY";
     private static final int RC_SIGN_IN = 123;
 
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -220,9 +220,24 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
+    public void showMarkerOnMap(PositionContent.PositionItem item)
+    {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(POSITIONITEMKEY, item);
+
+        ParkFragment parkFragment1 = new ParkFragment();
+        parkFragment1.setArguments(bundle);
+
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(
+                R.id.fragment_holder,
+                parkFragment1
+        ).addToBackStack(null).commit();
+    }
+
     @Override
     public void onListFragmentInteraction(PositionContent.PositionItem item) {
-        Toast.makeText(this, item.id, Toast.LENGTH_SHORT).show();
+        showMarkerOnMap(item);
     }
 
     @Override
