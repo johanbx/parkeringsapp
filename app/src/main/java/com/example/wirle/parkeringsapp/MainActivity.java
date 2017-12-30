@@ -1,5 +1,6 @@
 package com.example.wirle.parkeringsapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,8 +13,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +31,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,7 +47,28 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mDatabaseRef;
 
+    private boolean saveExist = false;
+
     ParkFragment parkFragment;
+
+    private class SaveBundle implements Serializable {
+        private DatabaseReference mDatabaseRef;
+        private ParkFragment parkFragment;
+    }
+
+    // invoked when the activity may be temporarily destroyed, save the instance state here
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        SaveBundle saveBundle = new SaveBundle();
+        saveBundle.mDatabaseRef = mDatabaseRef;
+        saveBundle.parkFragment = parkFragment;
+        outState.putSerializable("SAVEBUNDLEKEY", saveBundle);
+
+        // call superclass to save any view hierarchy
+        super.onSaveInstanceState(outState);
+    }
+
 
     /*
         * Note to self:
@@ -56,8 +82,22 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (savedInstanceState == null) {
+            parkFragment = new ParkFragment();
+        } else {
+            SaveBundle saveBundle = (SaveBundle)
+                    savedInstanceState.getSerializable("SAVEBUNDLEKEY");
+
+            if (saveBundle != null)
+            {
+                saveExist = true;
+                parkFragment = saveBundle.parkFragment;
+                mDatabaseRef = saveBundle.mDatabaseRef;
+            }
+        }
+
         // init fragments that require a "state"
-        parkFragment = new ParkFragment();
+        // parkFragment = new ParkFragment();
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -75,28 +115,41 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // set default page
-        navigationView.setCheckedItem(R.id.nav_home);
-        navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
+        // navigationView.setCheckedItem(R.id.nav_home);
+        // navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
 
-        // Authentication
-        // Choose authentication providers
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
 
-        // Create and launch sign-in intent
-        startActivityForResult(
-            AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build(),
-            RC_SIGN_IN);
+        if (!saveExist) {
+            List<AuthUI.IdpConfig> providers = Arrays.asList(
+                    new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
+
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setAvailableProviders(providers)
+                            .build(),
+                    RC_SIGN_IN);
+        }
+    }
+
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        View v = super.onCreateView(name, context, attrs);
+
+        if (saveExist) {
+            setupNavHeaderUser(FirebaseAuth.getInstance().getCurrentUser());
+        }
+
+        return v;
     }
 
     protected void setupNavHeaderUser(FirebaseUser user)
     {
+        Log.d("BLA", user.getPhotoUrl().toString());
+
         // image
         ImageView navHeaderUserLoginImage = findViewById(R.id.navHeaderUserLoginImage);
-        if (user.getPhotoUrl() != null) {
+        if (user.getPhotoUrl() != null && navHeaderUserLoginImage != null) {
             new ImageLoadTask(user.getPhotoUrl().toString(), navHeaderUserLoginImage).execute();
         }
 
@@ -108,7 +161,9 @@ public class MainActivity extends AppCompatActivity
 
         // mail
         TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
-        navHeaderUserLoginMail.setText(user.getEmail());
+        if (navHeaderUserLoginImage != null) {
+            navHeaderUserLoginMail.setText(user.getEmail());
+        }
     }
 
     @Override
