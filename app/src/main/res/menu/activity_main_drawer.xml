@@ -12,10 +12,10 @@
             android:id="@+id/nav_places"
             android:icon="@drawable/ic_menu_place"
             android:title="@string/navigation_item_place" />
-        <item
+        <!--item
             android:id="@+id/nav_buy"
             android:icon="@drawable/ic_menu_buy"
-            android:title="@string/navigation_item_buy" />
+            android:title="@string/navigation_item_buy" /-->
         <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_menu_about"

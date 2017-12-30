@@ -216,9 +216,10 @@ public class MainActivity extends AppCompatActivity
                     R.id.fragment_holder,
                     aboutFragment
             ).addToBackStack(null).commit();
-        } else if (id == R.id.nav_buy) {
+        }/* else if (id == R.id.nav_buy) {
 
-        } else if (id == R.id.nav_places) {
+        }*/
+        else if (id == R.id.nav_places) {
             analyseNavigationSelect(Integer.toString(id), "nav places");
             PlaceFragment placeFragment = new PlaceFragment();
             FragmentManager manager = getSupportFragmentManager();
