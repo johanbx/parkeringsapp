@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity
         // navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
 
         if (savedInstanceState != null) {
-            Log.d("BLA", "LOAD PARKFRAGMENT");
             parkFragment = (ParkFragment) getSupportFragmentManager()
                     .getFragment(savedInstanceState, "PARKFRAGMENTKEY");
         } else {
@@ -246,11 +245,6 @@ public class MainActivity extends AppCompatActivity
 
     public void showMarkerOnMap(PositionContent.PositionItem item)
     {
-
-        Toast.makeText(this,"clicked.",
-                Toast.LENGTH_SHORT).show();
-
-        /*
         Bundle bundle = new Bundle();
         bundle.putSerializable(POSITIONITEMKEY, item);
 
@@ -262,7 +256,6 @@ public class MainActivity extends AppCompatActivity
                 R.id.fragment_holder,
                 parkFragment1
         ).addToBackStack(null).commit();
-        */
     }
 
     @Override

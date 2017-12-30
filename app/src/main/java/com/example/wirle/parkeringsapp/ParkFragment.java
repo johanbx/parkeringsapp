@@ -48,28 +48,44 @@ public class ParkFragment extends Fragment implements
 
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int DEFAULT_ZOOM = 15;
+    private static final int DEFAULT_ZOOM = 18;
 
     private static final String POSITIONITEMKEY = "POSITIONITEMKEY";
-    private static final String CURRENTMARKERKEY = "CURRENTMARKERKEY";
-    private static final String DEBUGTAG = "ParkFragment";
+    private static final String MARKERLATITUDEKEY = "MARKERLATITUDEKEY";
+    private static final String MARKERLONGITUDEKEY = "MARKERLONGITUDEKEY";
+    private static final String MARKERADDRESSKEY = "MARKERADDRESSKEY";
+    private static final String CURRENTZOOMKEY = "CURRENTZOOMKEY";
+    private static final String MAPVIEWLATITUDEKEY = "MAPVIEWLATITUDEKEY";
+    private static final String MAPVIEWLONGITUDEKEY = "MAPVIEWLONGITUDEKEY";
 
     private boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
-
     private MarkerObject currentMarker;
-
-    // The entry point to the Fused Location Provider.
+    private float currentZoom = DEFAULT_ZOOM;
+    private double currentLatitude;
+    private double currentLongitude;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-
-    // The geographical location where the device is currently located. That is, the last-known
-    // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
 
     private class MarkerObject implements Serializable {
         private Double latitude;
         private Double longitude;
         private String address;
+
+        MarkerObject() {
+
+        }
+
+        MarkerObject(Double latitude_, Double longitude_, String address_) {
+            latitude = latitude_;
+            longitude = longitude_;
+            address = address_;
+        }
+
+        @Override
+        public String toString() {
+            return latitude + ", " + longitude;
+        }
     }
 
     public ParkFragment() {
@@ -82,11 +98,18 @@ public class ParkFragment extends Fragment implements
 
         // load marker
         if (savedInstanceState != null) {
-            MarkerObject markerObject = new MarkerObject();
-            markerObject.latitude = savedInstanceState.getDouble("MARKERLATITUDE");
-            markerObject.longitude = savedInstanceState.getDouble("MARKERLONGITUDE");
-            markerObject.address = savedInstanceState.getString("MARKERADDRESS");
-            currentMarker = markerObject;
+            currentMarker = new MarkerObject(
+                    savedInstanceState.getDouble(MARKERLATITUDEKEY),
+                    savedInstanceState.getDouble(MARKERLONGITUDEKEY),
+                    savedInstanceState.getString(MARKERADDRESSKEY)
+            );
+
+            // load last zoom level
+            currentZoom = savedInstanceState.getFloat(CURRENTZOOMKEY, DEFAULT_ZOOM);
+
+            // load last view position on map
+            currentLatitude = savedInstanceState.getDouble(MAPVIEWLATITUDEKEY);
+            currentLongitude = savedInstanceState.getDouble(MAPVIEWLONGITUDEKEY);
         }
     }
 
@@ -96,21 +119,33 @@ public class ParkFragment extends Fragment implements
 
         // save currentmarker
         if (currentMarker != null) {
-            outState.putDouble("MARKERLATITUDE", currentMarker.latitude);
-            outState.putDouble("MARKERLONGITUDE", currentMarker.longitude);
-            outState.putString("MARKERADDRESS", currentMarker.address);
+            outState.putDouble(MARKERLATITUDEKEY, currentMarker.latitude);
+            outState.putDouble(MARKERLONGITUDEKEY, currentMarker.longitude);
+            outState.putString(MARKERADDRESSKEY, currentMarker.address);
+        }
+
+        if (mMap != null) {
+            // save zoom level
+            currentZoom = mMap.getCameraPosition().zoom;
+            outState.putFloat(CURRENTZOOMKEY, currentZoom);
+
+            // save view positon on map
+            outState.putDouble(MAPVIEWLATITUDEKEY, mMap.getCameraPosition().target.latitude);
+            outState.putDouble(MAPVIEWLONGITUDEKEY, mMap.getCameraPosition().target.longitude);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
+        // layout
         View v = inflater.inflate(R.layout.fragment_park, container, false);
 
-        // Construct a FusedLocationProviderClient.
+        // location service
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        // fill out mapfragment in layout
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -119,10 +154,31 @@ public class ParkFragment extends Fragment implements
         ToggleButton toggleButton = v.findViewById(R.id.toggleButton);
         toggleButton.setOnClickListener(this);
 
+        // hide button if positionitem is clicked
+        if (getPositionItem() != null) {
+            toggleButton.setVisibility(View.INVISIBLE);
+        }
+
         return v;
     }
 
+    public PositionContent.PositionItem getPositionItem() {
+        Bundle bundle = getArguments();
+        if(bundle != null && bundle.containsKey(POSITIONITEMKEY)) {
+            PositionContent.PositionItem positionItem = (PositionContent.PositionItem)
+                    bundle.getSerializable(POSITIONITEMKEY);
+            return positionItem;
+        }
+        return null;
+    }
+
     public void savePositionToDb() throws IOException {
+        if (mLastKnownLocation == null) {
+            Toast.makeText(getActivity(),
+                    "Could not find location", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -144,20 +200,20 @@ public class ParkFragment extends Fragment implements
 
         newPos.setValue(positionItem);
 
-        currentMarker = new MarkerObject();
-        currentMarker.latitude = positionItem.latitude;
-        currentMarker.longitude = positionItem.longitude;
-        currentMarker.address = positionItem.address;
+        currentMarker = new MarkerObject(positionItem.latitude, positionItem.longitude,
+                positionItem.address);
 
-        addCurrentMarker();
+        placeCurrentMarker();
     }
 
     private void removeCurrentMarker() {
-        mMap.clear();
-        currentMarker = null;
+        if (currentMarker != null) {
+            mMap.clear();
+            currentMarker = null;
+        }
     }
 
-    private void addCurrentMarker() {
+    private void placeCurrentMarker() {
         if (currentMarker != null) {
             mMap.clear();
             mMap.addMarker(new MarkerOptions().position(
@@ -178,13 +234,6 @@ public class ParkFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        /*
-        Log.d("GoogleMap", "Enter onMapReady");
-        LatLng sydney = new LatLng(-33.852, 151.211);
-        googleMap.addMarker(new MarkerOptions().position(sydney)
-                .title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        */
 
         // Prompt the user for permission.
         getLocationPermission();
@@ -192,63 +241,31 @@ public class ParkFragment extends Fragment implements
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-
-        // If marker is set, place it
-        addCurrentMarker();
-
-        // check bundle
-        // checkBundle();
-    }
-    /*
-    private void checkBundle() {
-        // if sent with bundle
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            if (bundle.containsKey(POSITIONITEMKEY)) {
-                // hide parking button
-                ToggleButton toggleButton = getView()
-                        .findViewById(R.id.toggleButton);
-                toggleButton.setVisibility(View.INVISIBLE);
-
-                // show marker on that item
-                PositionContent.PositionItem positionItem =
-                        (PositionContent.PositionItem) bundle
-                                .getSerializable(POSITIONITEMKEY);
-
-                if (positionItem != null) {
-                    MarkerObject markerObject = new MarkerObject();
-                    markerObject.longitude = positionItem.longitude;
-                    markerObject.latitude = positionItem.latitude;
-                    markerObject.address = positionItem.address;
-
-                    currentMarker = markerObject;
-
-                    addMarker(currentMarker);
-
-                    // move camera to marker
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(positionItem.latitude,
-                                    positionItem.longitude), DEFAULT_ZOOM));
-                }
-            }
+        // if positionitem is set, make it current marker and move to it
+        PositionContent.PositionItem positionItem = getPositionItem();
+        if (positionItem != null) {
+            currentMarker = new MarkerObject(positionItem.latitude,
+                    positionItem.longitude, positionItem.address);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(currentMarker.latitude,
+                            currentMarker.longitude), currentZoom));
         }
+        // show our last viewposition on map
+        else if (currentLatitude != 0.0f && currentLongitude != 0.0f) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(currentLatitude,
+                            currentLongitude), currentZoom));
+        }
+        // Get the current location of the device and set the position of the map.
         else {
-            // Get the current location of the device and set the position of the map.
             getDeviceLocation();
         }
-    }*/
 
-    /**
-     * Prompts the user for permission to use the device location.
-     */
+        // If marker is set, place it
+        placeCurrentMarker();
+    }
+
     private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -260,9 +277,6 @@ public class ParkFragment extends Fragment implements
         }
     }
 
-    /**
-     * Updates the map's UI settings based on whether the user has granted location permission.
-     */
     private void updateLocationUI() {
         if (mMap == null) {
             return;
@@ -282,14 +296,8 @@ public class ParkFragment extends Fragment implements
         }
     }
 
-    /**
-     * Gets the current location of the device, and positions the map's camera.
-     */
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
+        // try to get latest known location if locationpermission is granted
         try {
             if (mLocationPermissionGranted) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
@@ -303,14 +311,12 @@ public class ParkFragment extends Fragment implements
                             {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
-                                        mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                        mLastKnownLocation.getLongitude()), currentZoom));
                             }
 
                         } else {
-                            //Log.d(TAG, "Current location is null. Using defaults.");
-                            //Log.e(TAG, "Exception: %s", task.getException());
                             mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                                    .newLatLngZoom(mDefaultLocation, currentZoom));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -328,7 +334,7 @@ public class ParkFragment extends Fragment implements
 
     @Override
     public void onClick(View view) {
-        //do what you want to do when button is clicked
+        // do what you want to do when button is clicked
         switch (view.getId()) {
             case R.id.toggleButton:
                 ToggleButton toggleButton = view.findViewById(R.id.toggleButton);
