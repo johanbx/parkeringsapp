@@ -10,9 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -28,17 +31,9 @@ public class PlaceFragment extends Fragment {
     private static final String DBREFKEY = "DBREFKEY";
 
     private OnListFragmentInteractionListener mListener;
-    private OnDatabaseRefListener mRefListener;
-
-    //private DatabaseReference mDatabaseRef;
-    private ArrayList<String> listItems;
     private RecyclerView recyclerView;
 
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public PlaceFragment() {
     }
 
@@ -49,7 +44,16 @@ public class PlaceFragment extends Fragment {
     }
 
     private void initPositionContent() {
-        DatabaseReference mDbPositions = mRefListener.OnDatabaseRef().child("positions");
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null || database == null) {
+            return;
+        }
+
+        DatabaseReference dbRef = database.getReference(user.getUid());
+        DatabaseReference mDbPositions = dbRef.child("positions");
+
         mDbPositions.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -92,15 +96,6 @@ public class PlaceFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-
-
-        if (context instanceof OnDatabaseRefListener) {
-            mRefListener = (OnDatabaseRefListener) context;
-        }
-        else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnDatabaseRefListener");
-        }
     }
 
     @Override
@@ -121,9 +116,5 @@ public class PlaceFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(PositionContent.PositionItem item);
-    }
-
-    public interface OnDatabaseRefListener {
-        DatabaseReference OnDatabaseRef();
     }
 }

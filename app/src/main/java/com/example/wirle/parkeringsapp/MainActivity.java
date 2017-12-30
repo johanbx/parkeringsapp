@@ -37,70 +37,27 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        PlaceFragment.OnListFragmentInteractionListener,
-        PlaceFragment.OnDatabaseRefListener,
-        ParkFragment.OnDatabaseRefListener{
+        PlaceFragment.OnListFragmentInteractionListener {
 
     private static final String POSITIONITEMKEY = "POSITIONITEMKEY";
+    private static final String SAVEBUNDLEKEY = "SAVEBUNDLEKEY";
     private static final int RC_SIGN_IN = 123;
-
-    private FirebaseAnalytics mFirebaseAnalytics;
-    private DatabaseReference mDatabaseRef;
-
-    private boolean saveExist = false;
 
     ParkFragment parkFragment;
 
-    private class SaveBundle implements Serializable {
-        private DatabaseReference mDatabaseRef;
-        private ParkFragment parkFragment;
-    }
-
-    // invoked when the activity may be temporarily destroyed, save the instance state here
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
-        SaveBundle saveBundle = new SaveBundle();
-        saveBundle.mDatabaseRef = mDatabaseRef;
-        saveBundle.parkFragment = parkFragment;
-        outState.putSerializable("SAVEBUNDLEKEY", saveBundle);
-
-        // call superclass to save any view hierarchy
+        if (parkFragment != null) {
+            getSupportFragmentManager().putFragment(outState, "PARKFRAGMENTKEY", parkFragment);
+        }
         super.onSaveInstanceState(outState);
     }
 
-
-    /*
-        * Note to self:
-        * This function is called on rotation and therefor it will always login and
-        * change to "home" on rotation. This is bad practise but will have to suffice for
-        * now. For now, users can only use portraitmode (see manifest).
-        *
-        * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-
-        if (savedInstanceState == null) {
-            parkFragment = new ParkFragment();
-        } else {
-            SaveBundle saveBundle = (SaveBundle)
-                    savedInstanceState.getSerializable("SAVEBUNDLEKEY");
-
-            if (saveBundle != null)
-            {
-                saveExist = true;
-                parkFragment = saveBundle.parkFragment;
-                mDatabaseRef = saveBundle.mDatabaseRef;
-            }
-        }
-
-        // init fragments that require a "state"
-        // parkFragment = new ParkFragment();
-
-        // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -118,35 +75,28 @@ public class MainActivity extends AppCompatActivity
         // navigationView.setCheckedItem(R.id.nav_home);
         // navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
 
-
-        if (!saveExist) {
-            List<AuthUI.IdpConfig> providers = Arrays.asList(
-                    new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
-
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(providers)
-                            .build(),
-                    RC_SIGN_IN);
+        if (savedInstanceState != null) {
+            Log.d("BLA", "LOAD PARKFRAGMENT");
+            parkFragment = (ParkFragment) getSupportFragmentManager()
+                    .getFragment(savedInstanceState, "PARKFRAGMENTKEY");
+        } else {
+            loginUser();
         }
     }
 
-    @Override
-    public View onCreateView(String name, Context context, AttributeSet attrs) {
-        View v = super.onCreateView(name, context, attrs);
+    private void loginUser() {
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
 
-        if (saveExist) {
-            setupNavHeaderUser(FirebaseAuth.getInstance().getCurrentUser());
-        }
-
-        return v;
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);
     }
 
-    protected void setupNavHeaderUser(FirebaseUser user)
-    {
-        Log.d("BLA", user.getPhotoUrl().toString());
-
+    protected void setupNavHeaderUser(FirebaseUser user) {
         // image
         ImageView navHeaderUserLoginImage = findViewById(R.id.navHeaderUserLoginImage);
         if (user.getPhotoUrl() != null && navHeaderUserLoginImage != null) {
@@ -171,13 +121,10 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 setupNavHeaderUser(user);
-                initializeDatabaseConnection(user);
             } else {
                 signInFailed();
             }
@@ -212,11 +159,6 @@ public class MainActivity extends AppCompatActivity
         finish();
     }
 
-    private void initializeDatabaseConnection(FirebaseUser user) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        mDatabaseRef = database.getReference(user.getUid());
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -236,12 +178,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setCheckedItem(R.id.nav_about);
@@ -255,11 +193,15 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
             analyseNavigationSelect(Integer.toString(id), "nav home");
+
+            if (parkFragment == null) {
+                parkFragment = new ParkFragment();
+            }
+
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(
                     R.id.fragment_holder,
@@ -294,15 +236,21 @@ public class MainActivity extends AppCompatActivity
 
     public void analyseNavigationSelect(String id, String type)
     {
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id);
         bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, type);
         bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "NavigationItem");
-        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     public void showMarkerOnMap(PositionContent.PositionItem item)
     {
+
+        Toast.makeText(this,"clicked.",
+                Toast.LENGTH_SHORT).show();
+
+        /*
         Bundle bundle = new Bundle();
         bundle.putSerializable(POSITIONITEMKEY, item);
 
@@ -314,15 +262,11 @@ public class MainActivity extends AppCompatActivity
                 R.id.fragment_holder,
                 parkFragment1
         ).addToBackStack(null).commit();
+        */
     }
 
     @Override
     public void onListFragmentInteraction(PositionContent.PositionItem item) {
         showMarkerOnMap(item);
-    }
-
-    @Override
-    public DatabaseReference OnDatabaseRef() {
-        return mDatabaseRef;
     }
 }

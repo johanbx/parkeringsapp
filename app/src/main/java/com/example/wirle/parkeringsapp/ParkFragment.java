@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -28,7 +29,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -39,7 +43,8 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ParkFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
+public class ParkFragment extends Fragment implements
+        OnMapReadyCallback, View.OnClickListener {
 
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -51,7 +56,6 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
 
     private boolean mLocationPermissionGranted = false;
     private GoogleMap mMap;
-    private OnDatabaseRefListener mRefListener;
 
     private MarkerObject currentMarker;
 
@@ -62,7 +66,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
 
-    private class MarkerObject implements Serializable{
+    private class MarkerObject implements Serializable {
         private Double latitude;
         private Double longitude;
         private String address;
@@ -70,6 +74,32 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
 
     public ParkFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // load marker
+        if (savedInstanceState != null) {
+            MarkerObject markerObject = new MarkerObject();
+            markerObject.latitude = savedInstanceState.getDouble("MARKERLATITUDE");
+            markerObject.longitude = savedInstanceState.getDouble("MARKERLONGITUDE");
+            markerObject.address = savedInstanceState.getString("MARKERADDRESS");
+            currentMarker = markerObject;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save currentmarker
+        if (currentMarker != null) {
+            outState.putDouble("MARKERLATITUDE", currentMarker.latitude);
+            outState.putDouble("MARKERLONGITUDE", currentMarker.longitude);
+            outState.putString("MARKERADDRESS", currentMarker.address);
+        }
     }
 
     @Override
@@ -93,7 +123,15 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     }
 
     public void savePositionToDb() throws IOException {
-        DatabaseReference newPos = mRefListener.OnDatabaseRef().child("positions").push();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null || database == null) {
+            return;
+        }
+
+        DatabaseReference dbRef = database.getReference(user.getUid());
+        DatabaseReference newPos = dbRef.child("positions").push();
         PositionContent.PositionItem positionItem = new PositionContent.PositionItem();
 
         positionItem.id = newPos.getKey();
@@ -111,14 +149,21 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         currentMarker.longitude = positionItem.longitude;
         currentMarker.address = positionItem.address;
 
-        addMarker(currentMarker);
+        addCurrentMarker();
     }
 
-    private void addMarker(MarkerObject markerObject) {
+    private void removeCurrentMarker() {
         mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(
-                new LatLng(markerObject.latitude, markerObject.longitude))
-                .title(markerObject.address));
+        currentMarker = null;
+    }
+
+    private void addCurrentMarker() {
+        if (currentMarker != null) {
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(
+                    new LatLng(currentMarker.latitude, currentMarker.longitude))
+                    .title(currentMarker.address));
+        }
     }
 
     private String getAddressFromLocation(Double latitude, Double longitude) throws IOException {
@@ -147,10 +192,16 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
-        // check bundle
-        checkBundle();
-    }
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
 
+        // If marker is set, place it
+        addCurrentMarker();
+
+        // check bundle
+        // checkBundle();
+    }
+    /*
     private void checkBundle() {
         // if sent with bundle
         Bundle bundle = getArguments();
@@ -187,7 +238,7 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
             // Get the current location of the device and set the position of the map.
             getDeviceLocation();
         }
-    }
+    }*/
 
     /**
      * Prompts the user for permission to use the device location.
@@ -273,14 +324,6 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        if (context instanceof ParkFragment.OnDatabaseRefListener) {
-            mRefListener = (OnDatabaseRefListener) context;
-        }
-        else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnDatabaseRefListener");
-        }
     }
 
     @Override
@@ -300,14 +343,9 @@ public class ParkFragment extends Fragment implements OnMapReadyCallback, View.O
                 }
                 else {
                     // remove marking on map
-                    mMap.clear();
+                    removeCurrentMarker();
                 }
                 break;
         }
-    }
-
-    // interfaces
-    public interface OnDatabaseRefListener {
-        DatabaseReference OnDatabaseRef();
     }
 }
