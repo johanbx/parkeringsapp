@@ -21,4 +21,7 @@
 
     <string name="default_nav_name" translatable="false">Android Studio</string>
     <string name="default_nav_mail" translatable="false">android.studio@android.com</string>
+    <string name="facebook_icon_description">Facebook Icon</string>
+    <string name="google_plus_icon_description">Google Plus Icon</string>
+    <string name="twitter_icon_description">Twitter Icon</string>
 </resources>
