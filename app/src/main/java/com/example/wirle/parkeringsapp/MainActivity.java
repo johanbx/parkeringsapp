@@ -188,6 +188,9 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.nav_about);
+            navigationView.getMenu().performIdentifierAction(R.id.nav_about, 0);
             return true;
         }
 
