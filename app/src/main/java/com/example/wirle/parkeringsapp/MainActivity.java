@@ -1,6 +1,5 @@
 package com.example.wirle.parkeringsapp;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,26 +12,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
-import com.firebase.ui.auth.ResultCodes;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -40,7 +30,8 @@ public class MainActivity extends AppCompatActivity
         PlaceFragment.OnListFragmentInteractionListener {
 
     private static final String POSITIONITEMKEY = "POSITIONITEMKEY";
-    private static final String SAVEBUNDLEKEY = "SAVEBUNDLEKEY";
+    private static final String PARKFRAGMENTKEY = "PARKFRAGMENTKEY";
+
     private static final int RC_SIGN_IN = 123;
 
     ParkFragment parkFragment;
@@ -48,7 +39,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (parkFragment != null) {
-            getSupportFragmentManager().putFragment(outState, "PARKFRAGMENTKEY", parkFragment);
+            getSupportFragmentManager().putFragment(outState, PARKFRAGMENTKEY, parkFragment);
         }
         super.onSaveInstanceState(outState);
     }
@@ -76,7 +67,7 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState != null) {
             parkFragment = (ParkFragment) getSupportFragmentManager()
-                    .getFragment(savedInstanceState, "PARKFRAGMENTKEY");
+                    .getFragment(savedInstanceState, PARKFRAGMENTKEY);
         } else {
             loginUser();
         }
@@ -91,7 +82,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loginUser() {
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
+        List<AuthUI.IdpConfig> providers = Collections.singletonList(
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
 
         startActivityForResult(
