@@ -56,24 +56,23 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
+        // setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // setup drawer
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        // setup navigation
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // set default page
-        // navigationView.setCheckedItem(R.id.nav_home);
-        // navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
 
         if (savedInstanceState != null) {
             parkFragment = (ParkFragment) getSupportFragmentManager()
@@ -81,6 +80,14 @@ public class MainActivity extends AppCompatActivity
         } else {
             loginUser();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // setup navigation content
+        setupNavHeaderUser();
     }
 
     private void loginUser() {
@@ -95,22 +102,33 @@ public class MainActivity extends AppCompatActivity
                 RC_SIGN_IN);
     }
 
-    protected void setupNavHeaderUser(FirebaseUser user) {
+    protected void setupNavHeaderUser() {
+
+        // make sure user is signed in
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        // get the view
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View view = navigationView.getHeaderView(0);
+
         // image
-        ImageView navHeaderUserLoginImage = findViewById(R.id.navHeaderUserLoginImage);
+        ImageView navHeaderUserLoginImage = view.findViewById(R.id.navHeaderUserLoginImage);
         if (user.getPhotoUrl() != null && navHeaderUserLoginImage != null) {
             new ImageLoadTask(user.getPhotoUrl().toString(), navHeaderUserLoginImage).execute();
         }
 
         // name
-        TextView navHeaderUserLoginName = findViewById(R.id.navHeaderUserLoginName);
-        if (navHeaderUserLoginImage != null) {
+        TextView navHeaderUserLoginName = view.findViewById(R.id.navHeaderUserLoginName);
+        if (navHeaderUserLoginName != null) {
             navHeaderUserLoginName.setText(user.getDisplayName());
         }
 
         // mail
-        TextView navHeaderUserLoginMail = findViewById(R.id.navHeaderUserLoginMail);
-        if (navHeaderUserLoginImage != null) {
+        TextView navHeaderUserLoginMail = view.findViewById(R.id.navHeaderUserLoginMail);
+        if (navHeaderUserLoginMail != null) {
             navHeaderUserLoginMail.setText(user.getEmail());
         }
     }
@@ -120,11 +138,7 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                setupNavHeaderUser(user);
-            } else {
+            if (resultCode != RESULT_OK) {
                 signInFailed();
             }
         }
@@ -193,6 +207,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+
+        Log.d("BLA", "aLÖALÖSDÖASD");
 
         if (id == R.id.nav_home) {
             analyseNavigationSelect(Integer.toString(id), "nav home");
