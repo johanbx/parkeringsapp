@@ -35,7 +35,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -173,6 +175,9 @@ public class ParkFragment extends Fragment implements
     }
 
     public void savePositionToDb() throws IOException {
+        // get the latest device location
+        getDeviceLocation(false);
+
         if (mLastKnownLocation == null) {
             Toast.makeText(getActivity(),
                     "Could not find location", Toast.LENGTH_SHORT).show();
@@ -241,7 +246,10 @@ public class ParkFragment extends Fragment implements
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
-        // if positionitem is set, make it current marker and move to it
+        // get the device location
+        getDeviceLocation(false);
+
+        // if positionitem is set, make it current marker and move camera to it
         PositionContent.PositionItem positionItem = getPositionItem();
         if (positionItem != null) {
             currentMarker = new MarkerObject(positionItem.latitude,
@@ -250,15 +258,15 @@ public class ParkFragment extends Fragment implements
                     new LatLng(currentMarker.latitude,
                             currentMarker.longitude), currentZoom));
         }
-        // show our last viewposition on map
+        // move camera to the last viewposition on map
         else if (currentLatitude != 0.0f && currentLongitude != 0.0f) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(currentLatitude,
                             currentLongitude), currentZoom));
         }
-        // Get the current location of the device and set the position of the map.
+        // move camera to our position
         else {
-            getDeviceLocation();
+            getDeviceLocation(true);
         }
 
         // If marker is set, place it
@@ -296,7 +304,7 @@ public class ParkFragment extends Fragment implements
         }
     }
 
-    private void getDeviceLocation() {
+    private void getDeviceLocation(final boolean moveCameraToLocation) {
         // try to get latest known location if locationpermission is granted
         try {
             if (mLocationPermissionGranted) {
@@ -307,17 +315,12 @@ public class ParkFragment extends Fragment implements
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            if (mLastKnownLocation != null)
-                            {
+
+                            if (moveCameraToLocation) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
-                                        mLastKnownLocation.getLongitude()), currentZoom));
+                                            mLastKnownLocation.getLongitude()), currentZoom));
                             }
-
-                        } else {
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, currentZoom));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
@@ -344,7 +347,9 @@ public class ParkFragment extends Fragment implements
                     } catch (IOException e) {
                         Toast.makeText(getActivity(),"Failed to save location",
                                 Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
+                        StringWriter errors = new StringWriter();
+                        e.printStackTrace(new PrintWriter(errors));
+                        Log.e("ParkFragment", errors.toString());
                     }
                 }
                 else {
