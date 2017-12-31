@@ -208,8 +208,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        Log.d("BLA", "aLÖALÖSDÖASD");
-
         if (id == R.id.nav_home) {
             analyseNavigationSelect(Integer.toString(id), "nav home");
 
