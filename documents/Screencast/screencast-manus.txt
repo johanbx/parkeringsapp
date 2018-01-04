@@ -1,0 +1,33 @@
+Screencast Manus (demo)
+
+- Hej och välkommen Johan Borgenstiernas demo-screencast, liu id johbo462
+- Innan vi tittar på appen så börjar vi med att installera appen
+(visa android studio, koppla in mobilen, (visa snabbt att man kan skapa apk fil), klicka på start knappen)
+
+- Visa login
+  - förklara att det krävs Google Konto login och internetuppkoppling
+  - förklara att firebase databas används
+- Gå till parkering
+  - förklara att gps-rättigheter krävs
+  - visa att vi kan komma åt gps
+  - visa att knappen parkera för upp en liten markering
+  - visa att vändning på skärmen inte påverkar markering, parkeringsstatus, vy på kartan eller fragment-bytning
+- Gå till parkeringshistorik
+  - visa att platsen är sparad
+  - visa att vi kan klicka på platsen för att få upp vart den är (nämn att knappen är borta och att det är samma fragment)
+- Gå till om oss sidan
+  - visa att det händer något när man klickar på bildknapparna, men nämn att "delningsfunktionen" inte är där än
+
+Screencast Manus (kodgenomgång)
+- Hej och välkommen till Johan Borgenstiernas kodgenomgång-screencast, liu id johbo462
+ - Innan vår in i koden så börjar vi med att visa en liten karta på vart de olika filerna hör hemma i appen
+ - Om du har sett demo-screencasten kommer det vara mycket lättare att hänga med
+
+- Visa översiktsbild
+  - förklara alla olika stegen
+
+- Hoppa in i Android Studio
+ - Visa de olika filerna som finns och lätt genomgång vad varje fil gör
+ - Klicka på filerna en efter en
+    - förklara lite snabbt vad varje funktion har för syfte
+    - förklara hur datan sparas
