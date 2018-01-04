@@ -3,17 +3,34 @@
 Parkeringsapp är en app vars huvudsyfte är att få användaren att komma ihåg vart bilen är parkerad. Om du någonsin varit vid ett stort köpcentrum innan en stressigt innan julen helg förstår du vad jag pratar om.
 
 ## Några av huvudpunkterna
-   - Spara gps koordinater vart bilen är parkerad
-   - Alarm när parkerinstiden börjar ta slut
-   - Spara parkeringsplatser och parkeringstider
+ - Sätt ut en knapp på kartan där bilen är parkerad
+ - Sparar automatiskt platser (koordinater, adresser, tid, träffsäkerhet)
+ - Integererat med Google Maps API
+ - Inloggningar från Google Plus
+ - Databas som ligger i molnet
+ - Analytiska verktyg för att tracka användarevanor
 
 ### Några tekniker använda i appen
-* [Firebase] - Firebase för analys, statistik, användarinloggningar och databashantering
+* [Firebase] - Firebase för analys, statistik, användareinloggningar och databashantering
+* [Google Maps API] - Google Maps API som grund för kartan
 
    [Firebase]: <https://firebase.google.com/>
+   [Google Maps API]: <https://developers.google.com/maps/>
 
-### För utveckling
-För att debugga firebase analytics i realtid, gå in i powershell och kör denna
+## För utveckling
+
+### Saker som finns att göra
+ - Navigationsmenyn ska markera items när användare klickar på bakåtknappen
+ - Parkeringskoordinator hämtas från närmaste adress, borde hämtas från nuvarande punkt
+ - Analytiska verktyg för flera knapptryck i appen
+
+### Funktioner som kan implementeras
+ - Alarm på när perkerinstiden börjar ta slut
+ - Auto-parkering
+ - Förhindra att många dubletter sparas om användaren råkar komma åt parkeringsknappen
+
+### Debugga firebase analytics i realtid
+I Windows, Gå in i powershell och kör detta
 ```sh
 PS C:\Users\wirle\AppData\Local\Android\Sdk\platform-tools> ./adb shell setprop debug.firebase.analytics.app com.example.wirle.parkeringsapp
 ```
